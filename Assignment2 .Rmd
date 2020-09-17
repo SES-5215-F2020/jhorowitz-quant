@@ -1,0 +1,335 @@
+---
+title: "Assignment 2"
+author: "Jennifer Horowitz"
+date: "9/15/2020"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Setup 
+
+```{r load libraries, message=FALSE}
+library(tidyverse)
+```
+
+```{r}
+baseball<-read_csv('baseballstats.csv')
+```
+
+## Variables Chosen
+
+I chose variables:
+
+1. nameFirst: First name of the player
+
+2. nameLast: Last name of the player
+
+3. birthDate: Date player was born
+
+4. birthCountry: Country the player was born
+
+5. weight: Weight of the player (in pounds)
+
+6. height: Height of the player (in inches)
+
+7. bats: If the player bats right or left handed
+
+8. batting_average: Batting average of the player. Calculated by their number of hits divided by at bats
+
+9. slugging_average: Average slugging percentage. Total number of bases dived by at bats.
+
+10. gdp_per_capita: GDP from 1996, normalized to 2019 USD
+
+11. Continent: This column was newly created in order to simplify my analysis.
+
+
+
+## Distribution of Continuous Variables
+
+### Descriptive statistics
+
+First I calculated summary statistics.
+
+```{r}
+weight_summary <-  summary(baseball$weight)
+weight_sd <- sd(baseball$weight, na.rm = TRUE)
+weight_pop_mean_int <- t.test(baseball$weight)
+height_summary <-  summary(baseball$height)
+height_sd <- sd(baseball$height, na.rm = TRUE)
+height_pop_mean_int <- t.test(baseball$height)
+ba_summary <-  summary(baseball$batting_average)
+ba_sd <- sd(baseball$batting_average, na.rm = TRUE)
+ba_pop_mean_int <- t.test(baseball$batting_average)
+slugging_average_summary <-  summary(baseball$slugging_average)
+slugging_average_sd <- sd(baseball$slugging_average, na.rm = TRUE)
+slugging_average_pop_mean_int <- t.test(baseball$slugging_average)
+gdp_per_capita_summary <-  summary(baseball$gdp_per_capita)
+gdp_per_capita_sd <- sd(baseball$gdp_per_capita, na.rm = TRUE)
+gdp_per_capita_pop_mean_int <- t.test(baseball$gdp_per_capita)
+```
+
+
+And display them in a formatted table:
+
+
+
+```{r}
+summary_table <- tibble(
+  Statistic = c("Sample mean", 
+                "Median",
+                "Standard deviation",
+                "Interquartile range",
+                "Population mean (95% confidence)"),
+  `Median weight (pounds)` = c(prettyNum(weight_summary["Mean"], digits=3),
+                           weight_summary["Median"],
+                           prettyNum(weight_sd, digits = 3),
+                           paste(weight_summary["1st Qu."],"to", 
+                                 weight_summary["3rd Qu."]),
+                           paste(prettyNum(weight_pop_mean_int$conf.int[1],
+                                           digits=3), "to",
+                                 prettyNum(weight_pop_mean_int$conf.int[2],
+                                               digits=3))),
+  `Height (inches)` = c(prettyNum(height_summary["Mean"],digits=3),
+                           height_summary["Median"],
+                          prettyNum(height_sd, digits=3),
+                           paste(height_summary["1st Qu."], "to", 
+                                 height_summary["3rd Qu."]), 
+                           paste(prettyNum(height_pop_mean_int$conf.int[1],
+                                           digits=3), "to",
+                                 prettyNum(height_pop_mean_int$conf.int[2],
+                                           digits=3))),
+                        
+`Batting Average` = c(prettyNum(ba_summary["Mean"], digits=3),
+                           ba_summary["Median"],
+                           prettyNum(ba_sd, digits = 3),
+                           paste(ba_summary["1st Qu."],"to", 
+                                 ba_summary["3rd Qu."]),
+                           paste(prettyNum(ba_pop_mean_int$conf.int[1],
+                                           digits=3), "to",
+                                 prettyNum(ba_pop_mean_int$conf.int[2],
+                                               digits=3))),                        
+                        
+`Slugging average` = c(prettyNum(slugging_average_summary["Mean"], digits=3),
+                          slugging_average_summary["Median"],
+                           prettyNum(slugging_average_sd, digits = 3),
+                           paste(slugging_average_summary["1st Qu."],"to", 
+                                 slugging_average_summary["3rd Qu."]),
+                           paste(prettyNum(slugging_average_pop_mean_int$conf.int[1],
+                                           digits=3), "to",
+                                 prettyNum(slugging_average_pop_mean_int$conf.int[2],
+                                               digits=3))),
+
+`GDP Per Capita` = c(prettyNum(gdp_per_capita_summary["Mean"], digits=3),
+                           gdp_per_capita_summary["Median"],
+                           prettyNum(gdp_per_capita_sd, digits = 3),
+                           paste(gdp_per_capita_summary["1st Qu."],"to", 
+                                gdp_per_capita_summary["3rd Qu."]),
+                           paste(prettyNum(gdp_per_capita_pop_mean_int$conf.int[1],
+                                           digits=3), "to",
+                                 prettyNum(gdp_per_capita_pop_mean_int$conf.int[2],
+                                               digits=3))))
+
+
+knitr::kable(summary_table, 
+             caption = "Baseball Statistics")
+```
+
+### Histograms
+
+Now, I'll create histogram for each of these five. 
+
+#### Median weight
+
+#### Weight Histogram Distribution
+
+The majority of baseball players are less than 200 lbs. It is right skewed.
+```{r}
+ggplot(baseball, aes(x = weight)) + 
+  geom_histogram(color = "pink",bins=10, fill="orange") +
+  theme_dark() +
+  scale_x_continuous(name = "Weight (pounds)") + 
+  scale_y_continuous(name = "Baseball players in sample")
+```
+
+
+#### Height Histogram Distribution
+
+The majority of baseball players are taller than 6ft. It is an approximately normal distribution.
+
+
+```{r}
+ggplot(baseball, aes(x = height)) + 
+  geom_histogram(color = "pink", binwidth = 1,bins=10, fill="purple") +
+  theme_dark() +
+  scale_x_continuous(name = "Height (inches)") + 
+  scale_y_continuous(name = "Baseball players in sample")
+```
+
+
+
+
+
+#### Batting Average Histogram
+
+
+
+
+
+The batting average centered between .250/.260. There appeared to be some outliers as well because some people had a couple "at-bats" or one hit.
+
+```{r}
+ggplot(baseball, aes(x = batting_average)) + 
+  geom_histogram(color = "pink",bins=22, fill="red") +
+  theme_dark() +
+  scale_x_continuous(name = "Batting Average") + 
+  scale_y_continuous(name = "Baseball players in sample")
+```
+
+
+
+
+
+#### Slugging Average Histogram
+
+
+
+On average playeres had an average of less than .3. 
+
+```{r}
+ggplot(baseball, aes(x = slugging_average)) + 
+  geom_histogram( bins=3, fill="green") +
+  theme_dark() +
+  scale_x_continuous(name = "Slugging Average") + 
+  scale_y_continuous(name = "Baseball players in sample")
+```
+
+
+
+#### GDP Per Capita Histogram 
+
+The vast majority of players come from countries with a GDP per capita of 30000.
+
+
+
+```{r}
+ggplot(baseball, aes(x = gdp_per_capita)) + 
+  geom_histogram( bins=5, fill="yellow") +
+  theme_minimal() +
+  scale_x_continuous(name = "GDP Per Capita") + 
+  scale_y_continuous(name = "Baseball players in sample")
+```
+
+
+
+
+
+## Distribution of Categorical Variables
+
+
+
+
+I'll show two tables, one showing the proportions of each category for each of my categorical variables. It should be noted that the countries column was broken up further into continents. 
+
+```{r}
+baseball<-baseball %>% 
+  mutate(
+    continent = case_when (
+      birthCountry =="United States"~"North America",
+      birthCountry =="Jamaica"~"North America",
+      birthCountry =="Nicaragua"~"Central America",
+      birthCountry =="Mexico"~"Central America",
+      birthCountry =="Panama"~"Central America",
+      birthCountry =="Cuba"~"Central America",
+      birthCountry =="Curacao"~"South America",
+      birthCountry =="Colombia"~"South America",
+      TRUE ~ "other"
+    )
+  )
+```
+
+
+
+### Test Statistic Values 
+
+
+
+
+```{r}
+northamerica <- t.test (baseball$continent == "North America")
+centralamerica <- t.test (baseball$continent == "Central America")
+southamerica <- t.test (baseball$continent == "South America")
+other <- t.test (baseball$continent == "other")
+```
+
+### Continent Proportions
+
+```{r}
+tibble(`Majority Country` = c("North America",
+                                  "South America",
+                                  "Central America",
+                                  "Other"),
+                 `Sample proportion` = c(paste(prettyNum(northamerica$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(southamerica$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(centralamerica$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(other$estimate*100, 
+                                                         digits = 3), "%")),
+                 `95-percent confidence interval` = c(
+                   paste(prettyNum(northamerica$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(northamerica$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                   paste(prettyNum(southamerica$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(southamerica$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                   paste(prettyNum(centralamerica$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(centralamerica$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                   paste(prettyNum(other$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(other$conf.int[2]*100, digits=3),
+                         "%", sep="")))
+```
+
+### Batting: Right, Left, or Both
+
+The majority of people bat right.
+
+```{r}
+batsright <- t.test(baseball$bats=="R")
+batsleft <- t.test(baseball$bats=="L")
+batsboth <- t.test(baseball$bats=="B")
+```
+```{r}
+tibble(`Majority Batting Stance` = c("Bats Right",
+                                  "Bats Left",
+                                  "Bats Right and Bats Left"),
+                 `Sample proportion` = c(paste(prettyNum(batsright$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(batsleft$estimate*100, 
+                                                         digits = 3), "%"),
+                                         paste(prettyNum(batsboth$estimate*100, 
+                                                         digits = 3), "%")),
+                 `95-percent confidence interval` = c(
+                   paste(prettyNum(batsright$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(batsright$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                  paste(prettyNum(batsleft$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(batsleft$conf.int[2]*100, digits=3),
+                         "%", sep=""),
+                   paste(prettyNum(batsboth$conf.int[1]*100, digits=3),
+                         "% to ",
+                         prettyNum(batsboth$conf.int[2]*100, digits=3),
+                         "%", sep="")))
+```
+
