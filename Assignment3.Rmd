@@ -1,0 +1,447 @@
+---
+title: "Assignment 3"
+author: "Jennifer Horowitz"
+date: "9/22/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+```{r, message=FALSE, echo=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(MASS)
+library(ggthemes)
+library(wesanderson)
+```
+```{r}
+baseball<-read_csv('baseballstats.csv')
+```
+
+```{r}
+baseball<-baseball %>% 
+  mutate(
+    continent = case_when (
+      birthCountry =="United States"~"North America",
+      birthCountry =="Jamaica"~"North America",
+      birthCountry =="Nicaragua"~"Central America",
+      birthCountry =="Mexico"~"Central America",
+      birthCountry =="Panama"~"Central America",
+      birthCountry =="Cuba"~"Central America",
+      birthCountry =="Curacao"~"South America",
+      birthCountry =="Colombia"~"South America",
+      TRUE ~ "other"
+    )
+  )
+```
+**GDP per capita-- removed 
+
+### Continuous Variables 
+
+#### Weight and Height
+
+
+
+I start by comparing weight and height. 
+
+``` {r}
+corweightheight <- with(baseball,cor.test(weight,height))
+corweightheight
+```
+
+We can visualize the same relationship with a scatter plot. Weight and height are positively correlated. Pretty strong positive correlation between weight and height which is also statistically significant. Typically the taller people get the heavier they are. 
+
+I'll also add a trendline to the scatterplot using geom_smooth().
+
+``` {r}
+ggplot(baseball, aes(x = weight, y = height)) +
+  geom_point(size = 0.5, alpha = 0.25, position = "jitter") +
+  geom_smooth() +
+  theme_bw() +
+  scale_x_continuous(name = "Baseball Player Weight") +
+  scale_y_continuous(name = "Baseball Player Height") +
+                     #breaks = seq(0, 6000, by = 500),
+                    # labels = paste("$", 
+                                    #prettyNum(seq(0, 6000, by = 500),
+                                              #big.mark = ","))) +
+  annotate(geom = "text", x = 0, y = 84, 
+           label = paste("Correlation (95-percent confidence):",
+                         prettyNum(corweightheight$conf.int[1], digits = 2), 
+                         "to",
+                         prettyNum(corweightheight$conf.int[2], digits = 2)),
+           hjust = 0) 
+  
+```
+
+
+
+#### Weight and Batting Average 
+
+
+
+``` {r}
+corweightandbatting <- with(baseball,cor.test(weight,batting_average))
+corweightandbatting
+```
+
+``` {r}
+ggplot(baseball, aes(x = weight, y = batting_average)) +
+  geom_point(size = 0.5, alpha = 0.25, position = "jitter") +
+  geom_smooth() +
+  theme_clean() +
+  scale_x_continuous(name = "Baseball Player Weight") +
+  scale_y_continuous(name = "Baseball Player Batting Average") +
+  annotate(geom = "text", x = 0, y = .8, 
+           label = paste("Correlation (95-percent confidence):",
+                         prettyNum(corweightandbatting$conf.int[1], digits = 2), 
+                         "to",
+                         prettyNum(corweightandbatting$conf.int[2], digits = 2)),
+           hjust = 0)
+  
+```    
+
+Weight and batting average have almost no linear relationship. At the 95% confidence interval it exhibits no relationship-- it's not statistically signifcant. The p value = .5. 
+
+#### Weight and Slugging Average
+
+The two variables experience no linear relationship but it is statistically signifiant. 
+
+``` {r}
+corweightandslugging <- with(baseball,cor.test(weight,slugging_average))
+corweightandslugging
+```
+
+``` {r}
+ggplot(baseball, aes(x = weight, y = slugging_average)) +
+  geom_point(size = 0.5, alpha = 0.25, position = "jitter") +
+  geom_smooth() +
+  theme_dark() +
+  scale_x_continuous(name = "Baseball Player Weight") +
+  scale_y_continuous(name = "Baseball Player Slugging Average") +
+  annotate(geom = "text", x = 0, y = .5, 
+           label = paste("Correlation (95-percent confidence):",
+                         prettyNum(corweightandslugging$conf.int[1], digits = 2), 
+                         "to",
+                         prettyNum(corweightandslugging$conf.int[2], digits = 2)),
+           hjust = 0)
+  
+```  
+
+#### Height and Slugging Average
+
+
+The two variables exhibit no linear relationship and it is statistically significant. 
+
+``` {r}
+corheightandslugging <- with(baseball,cor.test(height,slugging_average))
+corheightandslugging
+```
+
+``` {r}
+baseball %>% 
+ filter(slugging_average<=0.4) %>% 
+  ggplot(aes(x = height, y = slugging_average)) +
+  geom_point(size = 0.5, alpha = 0.25, position = "jitter") +
+  geom_smooth() +
+  theme_bw() +
+  xlim(65,84) +
+  scale_x_continuous(name = "Baseball Player Height") +
+  scale_y_continuous(name = "Baseball Player Slugging Average") +
+  annotate(geom = "text", x = 69, y = .2, 
+           label = paste("Correlation (95-percent confidence):",
+                         prettyNum(corheightandslugging$conf.int[1], digits = 2), 
+                         "to",
+                         prettyNum(corheightandslugging$conf.int[2], digits = 2)),
+           hjust = 0)
+ 
+```
+
+
+#### Height and Batting Average 
+
+There is no linear relationship between these two variables. It is barely not statistically significant. 
+
+
+
+``` {r}
+corheightandbatting <- with(baseball,cor.test(height,batting_average))
+corheightandbatting
+```
+
+``` {r}
+ggplot(baseball, aes(x = height, y = slugging_average)) +
+  geom_point(size = 0.5, alpha = 0.25, position = "jitter") +
+  geom_smooth() +
+  theme_bw() +
+  xlim(65,84) +
+  scale_x_continuous(name = "Baseball Player Height") +
+  scale_y_continuous(name = "Baseball Player Slugging Average") +
+  annotate(geom = "text", x = 70, y = .1, 
+           label = paste("Correlation (95-percent confidence):",
+                         prettyNum(corheightandslugging$conf.int[1], digits = 2), 
+                         "to",
+                         prettyNum(corheightandslugging$conf.int[2], digits = 2)),
+           hjust = 0)
+  
+```
+
+#### Slugging Average and Batting Average 
+
+``` {r}
+corsaandba<- with(baseball,cor.test(slugging_average,batting_average))
+corsaandba
+```
+``` {r}
+ggplot(baseball, aes(x = batting_average, y = slugging_average)) +
+  geom_point(size = 0.5, alpha = 0.25, position = "jitter") +
+  geom_smooth() +
+  theme_economist_white() +
+  scale_x_continuous(name = "Batting Average") +
+  scale_y_continuous(name = "Slugging Average") +
+  xlim(0,0.5) + 
+  ylim(0,0.1) +
+  annotate(geom = "text", x = 0, y = .1, 
+           label = paste("Correlation (95-percent confidence):",
+                         prettyNum(corsaandba$conf.int[1], digits = 2), 
+                         "to",
+                         prettyNum(corsaandba$conf.int[2], digits = 2)),
+           hjust = 0)
+  
+```
+
+### Continuous Variable vs. Categorical Variable (3+ levels)
+ 
+#### Weight vs. Bats 
+
+There is a significant association between weight and bats. 
+
+``` {r}
+weightbatsanova <- aov(weight ~ bats, data = baseball)
+summary(weightbatsanova)
+```
+
+
+``` {r}
+weightbatsdif <- TukeyHSD(weightbatsanova)
+as_tibble(cbind(pair = row.names(weightbatsdif$bats),
+               weightbatsdif$bats))
+```
+
+The graph demonstrates that there is a higher preponderance of right handed players and the biggest difference lies between those that are left-handed and those who are "switch hitters".
+
+``` {r}
+ggplot(baseball, aes(x =bats, y = weight)) +
+  geom_boxplot() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_x_discrete(name = "Which Side of the Plate You Bat From") +
+  scale_y_continuous(name = "Weight") 
+
+```
+
+
+#### Weight vs. Continents  
+
+There is not a significant linear relationship between weight and continent. 
+
+``` {r}
+weightcontinentanova <- aov(weight ~ continent, data = baseball)
+summary(weightcontinentanova)
+```
+
+
+
+``` {r}
+weightcontinentdif <- TukeyHSD(weightcontinentanova)
+as_tibble(cbind(pair = row.names(weightcontinentdif$continent),
+               weightcontinentdif$continent))
+```
+
+The heaviest players originated from Central and South America. 
+
+``` {r}
+ggplot(baseball, aes(x = continent, y = weight)) +
+  geom_boxplot() +
+  theme_economist() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_x_discrete(name = "Which Continent Player Comes From") +
+  scale_y_continuous(name = "Weight") 
+
+```
+
+#### Height and Bats 
+
+There is a significant association between height and bats. 
+
+``` {r}
+heightbatsanova <- aov(height ~ bats, data = baseball)
+summary(heightbatsanova)
+```
+
+
+``` {r}
+heightbatsdif <- TukeyHSD(heightbatsanova)
+as_tibble(cbind(pair = row.names(heightbatsdif$bats),
+               heightbatsdif$bats))
+```
+The people that bat from both sides are on the shorter end of the height data available.
+
+
+``` {r}
+ggplot(baseball, aes(x =bats, y = height)) +
+  geom_boxplot() +
+  theme_fivethirtyeight() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_x_discrete(name = "Which Side of the Plate You Bat From") +
+  scale_y_continuous(name = "Height") 
+
+```
+
+
+#### Height and Continent
+
+There is not a significant relationship between the two variables. 
+
+``` {r}
+heightcontinentanova <- aov(height ~ continent, data = baseball)
+summary(heightcontinentanova)
+```
+
+
+
+``` {r}
+heightcontinentdif <- TukeyHSD(heightcontinentanova)
+as_tibble(cbind(pair = row.names(heightcontinentdif$continent),
+               heightcontinentdif$continent))
+```
+
+
+There was no significant relationship between the two variables. 
+
+
+``` {r}
+ggplot(baseball, aes(x = continent, y = height)) +
+  geom_boxplot() +
+  theme_solarized() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_x_discrete(name = "Which Continent Player Comes From") +
+  scale_y_continuous(name = "Height") 
+
+```
+
+South America-other experienced the most significant difference. 
+
+#### Batting Average and Bats
+
+
+There is a significant association between batting average and which side of the plate players hit from. 
+
+``` {r}
+babatsanova <- aov(batting_average ~ bats, data = baseball)
+summary(babatsanova)
+```
+
+
+``` {r}
+babatsdif <- TukeyHSD(babatsanova)
+as_tibble(cbind(pair = row.names(babatsdif$bats),
+               babatsdif$bats))
+```
+
+The magnitude on the for players to hit from the right-hand side is higher. The biggest range is between the players who hit from the left and players who hit from both sides. 
+
+
+``` {r}
+ggplot(baseball, aes(x = bats, y = batting_average)) +
+  geom_boxplot() +
+  theme_wsj() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_x_discrete(name = "Side of the Plate Players Bat On") +
+  scale_y_continuous(name = "Batting Average") 
+
+```
+
+
+
+#### Batting Average and Continent 
+
+There is not a significant linear relationship between batting average and continent. 
+
+``` {r}
+bacontinentanova <- aov(batting_average ~ continent, data = baseball)
+summary(bacontinentanova)
+```
+
+
+
+South America-other has the biggest difference (range) between them. 
+
+
+
+``` {r}
+bacontinentdif <- TukeyHSD(bacontinentanova)
+as_tibble(cbind(pair = row.names(bacontinentdif$continent),
+             bacontinentdif$continent))
+```
+
+``` {r}
+ggplot(baseball, aes(x = continent, y = batting_average)) +
+  geom_boxplot() +
+  theme_stata() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_x_discrete(name = "Continent of Origin") +
+  scale_y_continuous(name = "Batting Average") 
+```
+
+#### Continent and Slugging Average 
+
+There is not a significant linear relationship between slugging average and continent. 
+
+``` {r}
+sacontinentanova <- aov(slugging_average ~ continent, data = baseball)
+summary(sacontinentanova)
+```
+
+
+
+South America-other has the biggest difference (range) between them. 
+
+
+``` {r}
+sacontinentdif <- TukeyHSD(sacontinentanova)
+as_tibble(cbind(pair = row.names(sacontinentdif$continent),
+             sacontinentdif$continent))
+```
+``` {r}
+ggplot(baseball, aes(x = continent, y = slugging_average)) +
+  geom_boxplot() +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_x_discrete(name = "Continent of Origin") +
+  scale_y_continuous(name = "Slugging Average") 
+```
+
+
+
+### Chi Square Test: Two Categorical Variables 
+
+#### Bats and Continents 
+
+The linear relationship between bats and continents is not significant. 
+
+``` {r chi square}
+chi_sq <- chisq.test(baseball$bats, baseball$continent)
+  
+chi_sq
+```
+``` {r chi square observed}
+chi_sq$observed
+```
+
+Here are the values we would expect if the two variables were not related:
+
+``` {r chi square expected}
+chi_sq$expected
+```
