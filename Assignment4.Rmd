@@ -1,0 +1,106 @@
+---
+title: "Assignment 4"
+author: "Jennifer Horowitz"
+date: "9/30/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F)
+
+options(scipen = 999)
+```
+
+
+```{r}
+library(tidyverse)
+library(jtools)
+library(interactions)
+library(ggthemes)
+```
+
+```{r}
+baseball <- read.csv('baseballtidy.csv') 
+
+baseball <- baseball %>% 
+select(-X)
+```
+
+
+### Linear Regression
+
+
+#### Model 1
+
+
+The model shows that there is a positive relationship between weight and batting average. For every pound increase in weight, the batting average increase 0.0003. Weight has a p value of 0.21 which is not statistically significant. 
+
+Height is statistically significant. Every inch in height decreases batting average by .008130894. 
+
+Bats left is not statistically significant. If you bat left your batting average would go down .01 points. 
+
+Bats right is statistically significant. If you bat right your batting average would down 0.04 points. 
+
+Slugging average is statistically significant. If your slugging average is positive then your batting average goes up .9. 
+
+GDP per capita is not statistically significant. If your GDP per capita goes up then batting average goes down by a very small margin. 
+
+North American-born players are not statistically significant. If you're from North America your batting average goes up .05. 
+
+Players born in Europe and Asia were not statistically significant. If you are from Europe/Asia then your batting average goes up .06. 
+
+Players from South America were not statistically significant. If you are from South America then your batting average goes up .12. 
+
+
+My adjusted R-squared . 3482. It only explains 35% of the variance. 
+
+```{r}
+model1 <- lm(batting_average~.,data=baseball)
+summary(model1)
+```
+### Model 2 
+
+#### Interaction Term with GDP Per Term Continent 
+
+
+GDP per capita is often tied to what continent it relates to so the interaction term I will use is GDP per capita and continent
+
+My adjusted R squared was .3466. Which was slightly worse than model 1. 
+
+
+```{r}
+model2 <- lm(batting_average~.+ gdp_per_capita:continent,data=baseball)
+summary(model2)
+```
+### Model 3
+
+#### Using only the 3 significant variables. 
+
+Only the models that were significant in model 1. 
+
+My adjusted R squared is .3493 which is my best model so far. 
+
+```{r}
+model3 <- lm(batting_average~ height + bats + slugging_average,data=baseball)
+summary(model3)
+```
+
+
+
+### Visualizing the results 
+
+```{r}
+ModelFit <- tibble(model = c(1, 2, 3),
+                   R_square = c(summary(model1)$adj.r.squared,
+                                summary(model2)$adj.r.squared,
+                                summary(model3)$adj.r.squared))
+ggplot(ModelFit, aes(x = model, y = R_square)) +
+  geom_line() +
+  scale_x_continuous(name = "",
+                   breaks = breaks <- seq(1, 3, by = 1),
+                   labels = paste("Model", breaks)) +
+  scale_y_continuous(name = "Adjusted R-squared value") +
+  theme_solarized()
+```
+
+Model 3 is the best of the models based on the R-squared. 
