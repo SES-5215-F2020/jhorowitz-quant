@@ -1,0 +1,84 @@
+---
+title: "Assignment 5"
+author: "Jennifer Horowitz"
+date: "10/9/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+
+```
+
+
+
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+library(jtools)
+library(interactions)
+library(ggthemes)
+```
+
+```{r}
+baseball <- read.csv('baseballtidy.csv') 
+
+baseball <- baseball %>% 
+select(-X)
+```
+
+
+### Linear Regression
+
+
+#### Model 1
+
+Log transform of slugging average because it isn't approximately normal and will use the interaction term weight and height becauase weight usually increases with height. 
+
+To do the log transformation you need to remove all 0s from the slugging average.
+
+
+
+```{r}
+baseball <- baseball %>% 
+  filter(slugging_average>0)
+
+
+
+model1 <- lm(batting_average~weight + height + bats + log(slugging_average) + weight:height,data=baseball) 
+summary(model1)
+```
+
+
+This model has been the worst of of the models I have run so far. The adjusted R square value was .08 which was far worse than than any of the other adjusted R square values of previous models I have run.  
+
+
+### Model 2 
+
+I next logged GDP per capita to normalize it. The adjusted R square value was .09. It, similar to model 1, preformed badly. 
+
+```{r}
+model2 <- lm(batting_average~weight + height + bats + log(gdp_per_capita) + continent, data=baseball) 
+summary(model2) 
+```
+
+
+
+
+### Visualizing the results 
+
+The best model I ran of the models here was model 1. 
+
+```{r}
+ModelFit <- tibble(model = c(1, 2),
+                   R_square = c(summary(model1)$adj.r.squared,
+                                summary(model2)$adj.r.squared))
+ggplot(ModelFit, aes(x = model, y = R_square)) +
+  geom_line() +
+  scale_x_continuous(name = "",
+                   breaks = breaks <- seq(1, 2, by = 1),
+                   labels = paste("Model", breaks)) +
+  scale_y_continuous(name = "Adjusted R-squared value") +
+  theme_solarized()
+```
