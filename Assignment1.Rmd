@@ -1,24 +1,112 @@
 ---
-title: "Assignment1"
+title: "Assignment 1"
 author: "Jennifer Horowitz"
 date: "9/9/2020"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE,warnings=FALSE, messages=FALSE)
+knitr::opts_chunk$set(echo = TRUE, warnings = FALSE, messages=FALSE)
 ```
+
 
 ```{r load libraries}
 library(tidyverse)
 library(Lahman)
+library(kableExtra)
 ```
 
+
+```{r load data}
+gdp<- read.csv('API_NY.GDP.PCAP.CD_DS2_en_csv_v2_1429392 (1).csv',skip = 4) %>% 
+    select(Country.Name, X1996) %>% 
+    rename(
+        gdp_per_capita = X1996
+    )
+```
+
+# Data
+
+I decided to explore a subset of baseball data for batters in 1996. My unit level for analysis is at the player level. Data is from the [Lahman database](http://www.seanlahman.com/baseball-archive/statistics/) installed via the Lahman package.
+
+The second set of data used is Gross Domestic Product (GDP) per capita from 1996, downloaded from the [World Bank](https://data.worldbank.org/indicator/NY.GDP.PCAP.CD?view=chart). Data is adjusted to current United States dollars (USD).
+
+# Variables Chosen
+
+I chose variables:
+
+1. nameFirst: First name of the player
+
+2. nameLast: Last name of the player
+
+3. birthDate: Date player was born
+
+4. birthCountry: Country the player was born
+
+5. weight: Weight of the player (in pounds)
+
+6. height: Height of the player (in inches)
+
+7. bats: If the player bats right or left handed
+
+8. batting_average: Batting average of the player. Calculated by their number of hits divided by at bats
+
+9. slugging_average: Average slugging percentage. Total number of bases dived by at bats.
+
+10. gdp_per_capita: GDP from 1996, normalized to 2019 USD
+
+```{r create dataset}
+batting_stats_1996 <- Batting %>% 
+    filter(yearID == 1996 & AB > 0) %>% 
+    inner_join(People) %>% 
+    mutate(
+        batting_average = H/AB,
+        singles = H - (X2B +X3B + HR),
+        total_bases = (1 * singles + 2 * X2B + 3 * X3B + 4 * HR) / AB,
+        slugging_average = total_bases/AB
+    ) %>% 
+    select(nameFirst, nameLast, birthDate,birthCountry,
+           weight, height, bats, batting_average, slugging_average
+           ) %>% 
+    mutate(birthCountry = str_replace_all(birthCountry, 'USA', 'United States')) %>% 
+    inner_join(gdp, by = c('birthCountry' = 'Country.Name'))
+```
+
+Below is an example of the dataset:
+
 ```{r}
-batting_stats_1996 <- Batting %>%    
-  filter(yearID == 1996) %>% 
-  inner_join(People)
-```           
+batting_stats_1996 %>% 
+    head(10) %>% 
+    kable() %>% 
+    kableExtra::kable_styling()
+```
+
+My final dataset ends up with 10 variables and 757 players.
+
+# Save the data for future use
+
+```{r}
+ #write.csv(batting_stats_1996,'../Desktop/GitHub/jhorowitz-quant/baseballstats.csv')
+```
+
+# Types of variables
+
+
+### Continuous Variables
+
+Batting average, slugging average, height, weight, GDP per capita
+
+### Categorical Variables 
+
+First name, last name, birth country, bath dates 
+
+### Ordinal Variables 
+
+Birth date 
+
+# Research question
+
+How can batting average be explained with the selected variables? 
 
 
 
